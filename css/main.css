@@ -34,6 +34,14 @@ h2 {
     margin-top: 0;
     color: #ffffff;
 }
+form{
+    text-align: center;
+}
+new-add-button{
+
+    margin: 0 auto;
+    display: block;
+}
 
 ul {
     list-style: none;
