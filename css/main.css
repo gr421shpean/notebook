@@ -1,0 +1,47 @@
+
+body{
+    background-color: rgba(255, 181, 242, 0.79);
+
+}
+header{
+    background-color:rgba(255, 181, 242, 0.79);
+    height: 60px;
+    margin-bottom: 20px;
+
+}
+h1{
+    color: #ffffff;
+    text-align: center;
+}
+.columns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.column {
+    width: 30%;
+}
+
+.card {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 20px;
+}
+
+h2 {
+    margin-top: 0;
+    color: #ffffff;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.completed {
+    text-decoration: line-through;
+
+
+}
