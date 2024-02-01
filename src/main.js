@@ -1,3 +1,12 @@
+Vue.component('notes-item', {
+    template: `
+        <li>
+            {{ title }}
+            <button v-on:click="$emit('delete')">Удалить</button>
+        </li>
+    `,
+    props: ['title']
+});
 Vue.component('columns', {
     template: `
       <div class="columns">
@@ -12,6 +21,8 @@ Vue.component('columns', {
             inProgressColumn: [],
             completedColumn: [],
             maxCards: {
+                newColumn: 3,
+                inProgressColumn: 5,
                 completedColumn: Infinity
             },
             isFirstColumnLocked: false
@@ -19,17 +30,6 @@ Vue.component('columns', {
     },
     created() {
         this.loadFromLocalStorage();
-    },
-    loadFromLocalStorage() {
-        const data = JSON.parse(localStorage.getItem('todo-columns'));
-        if (data) {
-            this.newColumn = data.newColumn || [];
-            this.inProgressColumn = data.inProgressColumn || [];
-            this.completedColumn = data.completedColumn || [];
-            this.newColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
-            this.inProgressColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
-            this.completedColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
-        }
     },
     methods: {
         addCard(column, customTitle) {
@@ -58,6 +58,17 @@ Vue.component('columns', {
             this[column].push(newCard);
             this.saveToLocalStorage();
         },
+    },
+    loadFromLocalStorage() {
+        const data = JSON.parse(localStorage.getItem('todo-columns'));
+        if (data) {
+            this.newColumn = data.newColumn || [];
+            this.inProgressColumn = data.inProgressColumn || [];
+            this.completedColumn = data.completedColumn || [];
+            this.newColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
+            this.inProgressColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
+            this.completedColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
+        }
     },
     deleteCard(column, cardIndex) {
         this[column].splice(cardIndex, 1);
@@ -111,15 +122,7 @@ Vue.component('columns', {
     }
 
 });
-Vue.component('notes-item', {
-    template: `
-        <li>
-            {{ title }}
-            <button v-on:click="$emit('delete')">Удалить</button>
-        </li>
-    `,
-    props: ['title']
-});
+
 Vue.component('column', {
     props: ['title', 'cards'],
     template: `
