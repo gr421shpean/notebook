@@ -76,7 +76,6 @@ Vue.component('columns', {
                 this.newColumn = data.newColumn || [];
                 this.inProgressColumn = data.inProgressColumn || [];
                 this.completedColumn = data.completedColumn || [];
-                // Установка состояния чекбоксов
                 this.newColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
                 this.inProgressColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
                 this.completedColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
@@ -175,7 +174,7 @@ Vue.component('card', {
           <input type="checkbox" v-model="item.completed" @change="saveToLocalStorage" :disabled="card.status === 'Выполненные' || isFirstColumnLocked">
           <input type="text" v-model="item.text" @input="saveToLocalStorage" :disabled="!item.editing || card.status === 'Выполненные' || (card.status === 'В процессе' && isFirstColumnLocked)">
           <button @click="editItem(index)" v-else-if="!item.editing && card.status !== 'Выполненные' && !isFirstColumnLocked">Редактировать</button>
-          <button @click="deleteItem(index)" v-if="card.items.length > 3 && !isFirstColumnLocked && card.status !== 'Выполненные'">Удалить</button>
+<!--          <button @click="deleteItem(index)" v-if="card.items.length > 3 && !isFirstColumnLocked && card.status !== 'Выполненные'">Удалить</button>-->
         </li>
 
       </ul> 
