@@ -2,7 +2,9 @@
  * Vue.js v2.7.8
  * (c) 2014-2022 Evan You
  * Released under the MIT License.
+ * Подкачка Vue
  */
+
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
         typeof define === 'function' && define.amd ? define(factory) :
@@ -114,9 +116,9 @@
      */
     var isReservedAttribute = makeMap('key,ref,slot,slot-scope,is');
     /**
-     * Remove an item from an array.
+     * Delete an item from an array.
      */
-    function remove$2(arr, item) {
+    function delete$2(arr, item) {
         if (arr.length) {
             var index = arr.indexOf(item);
             if (index > -1) {
@@ -759,8 +761,8 @@
         Dep.prototype.addSub = function (sub) {
             this.subs.push(sub);
         };
-        Dep.prototype.removeSub = function (sub) {
-            remove$2(this.subs, sub);
+        Dep.prototype.deleteSub = function (sub) {
+            delete$2(this.subs, sub);
         };
         Dep.prototype.depend = function (info) {
             if (Dep.target) {
@@ -871,7 +873,7 @@
         notify: noop,
         depend: noop,
         addSub: noop,
-        removeSub: noop
+        deleteSub: noop
     };
     /**
      * Observer class that is attached to each observed
@@ -1504,7 +1506,7 @@
         invoker.fns = fns;
         return invoker;
     }
-    function updateListeners(on, oldOn, add, remove, createOnceHandler, vm) {
+    function updateListeners(on, oldOn, add, delete, createOnceHandler, vm) {
         var name, cur, old, event;
         for (name in on) {
             cur = on[name];
@@ -1530,7 +1532,7 @@
         for (name in oldOn) {
             if (isUndef(on[name])) {
                 event = normalizeEvent(name);
-                remove(event.name, oldOn[name], event.capture);
+                delete(event.name, oldOn[name], event.capture);
             }
         }
     }
@@ -1543,9 +1545,9 @@
         var oldHook = def[hookKey];
         function wrappedHook() {
             hook.apply(this, arguments);
-            // important: remove merged hook to ensure it's called only once
+            // important: delete merged hook to ensure it's called only once
             // and prevent memory leak
-            remove$2(invoker.fns, wrappedHook);
+            delete$2(invoker.fns, wrappedHook);
         }
         if (isUndef(oldHook)) {
             // no existing hook
@@ -2113,7 +2115,7 @@
         for (var i = 0, l = children.length; i < l; i++) {
             var child = children[i];
             var data = child.data;
-            // remove slot attribute if the node is resolved as a Vue slot node
+            // delete slot attribute if the node is resolved as a Vue slot node
             if (data && data.attrs && data.attrs.slot) {
                 delete data.attrs.slot;
             }
@@ -2552,7 +2554,7 @@
             var sync_1 = true;
             var timerLoading_1 = null;
             var timerTimeout_1 = null;
-            owner.$on('hook:destroyed', function () { return remove$2(owners_1, owner); });
+            owner.$on('hook:destroyed', function () { return delete$2(owners_1, owner); });
             var forceRender_1 = function (renderCompleted) {
                 for (var i = 0, l = owners_1.length; i < l; i++) {
                     owners_1[i].$forceUpdate();
@@ -2659,7 +2661,7 @@
     function add$1(event, fn) {
         target$1.$on(event, fn);
     }
-    function remove$1(event, fn) {
+    function delete$1(event, fn) {
         target$1.$off(event, fn);
     }
     function createOnceHandler$1(event, fn) {
@@ -2673,7 +2675,7 @@
     }
     function updateComponentListeners(vm, listeners, oldListeners) {
         target$1 = vm;
-        updateListeners(listeners, oldListeners || {}, add$1, remove$1, createOnceHandler$1, vm);
+        updateListeners(listeners, oldListeners || {}, add$1, delete$1, createOnceHandler$1, vm);
         target$1 = undefined;
     }
     function eventsMixin(Vue) {
@@ -2807,7 +2809,7 @@
             // based on the rendering backend used.
             if (!prevVnode) {
                 // initial render
-                vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
+                vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* deleteOnly */);
             }
             else {
                 // updates
@@ -2841,15 +2843,15 @@
             }
             callHook$1(vm, 'beforeDestroy');
             vm._isBeingDestroyed = true;
-            // remove self from parent
+            // delete self from parent
             var parent = vm.$parent;
             if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
-                remove$2(parent.$children, vm);
+                delete$2(parent.$children, vm);
             }
             // teardown scope. this includes both the render watcher and other
             // watchers created
             vm._scope.stop();
-            // remove reference from data ob
+            // delete reference from data ob
             // frozen object may not have observer.
             if (vm._data.__ob__) {
                 vm._data.__ob__.vmCount--;
@@ -2862,7 +2864,7 @@
             callHook$1(vm, 'destroyed');
             // turn off all instance listeners.
             vm.$off();
-            // remove __vue__ reference
+            // delete __vue__ reference
             if (vm.$el) {
                 vm.$el.__vue__ = null;
             }
@@ -4172,7 +4174,7 @@
             while (i--) {
                 var dep = this.deps[i];
                 if (!this.newDepIds.has(dep.id)) {
-                    dep.removeSub(this);
+                    dep.deleteSub(this);
                 }
             }
             var tmp = this.depIds;
@@ -4244,16 +4246,16 @@
             }
         };
         /**
-         * Remove self from all dependencies' subscriber list.
+         * delete self from all dependencies' subscriber list.
          */
         Watcher.prototype.teardown = function () {
             if (this.vm && !this.vm._isBeingDestroyed) {
-                remove$2(this.vm._scope.effects, this);
+                delete$2(this.vm._scope.effects, this);
             }
             if (this.active) {
                 var i = this.deps.length;
                 while (i--) {
-                    this.deps[i].removeSub(this);
+                    this.deps[i].deleteSub(this);
                 }
                 this.active = false;
                 if (this.onStop) {
@@ -5894,7 +5896,7 @@
             entry.componentInstance.$destroy();
         }
         cache[key] = null;
-        remove$2(keys, key);
+        delete$2(keys, key);
     }
     var patternTypes = [String, RegExp, Array];
     // TODO defineComponent
@@ -5972,7 +5974,7 @@
                 if (cache[key]) {
                     vnode.componentInstance = cache[key].componentInstance;
                     // make current key freshest
-                    remove$2(keys, key);
+                    delete$2(keys, key);
                     keys.push(key);
                 }
                 else {
@@ -6240,7 +6242,7 @@
         if (tagName !== 'select') {
             return elm;
         }
-        // false or null will remove the attribute but undefined will not
+        // false or null will delete the attribute but undefined will not
         if (vnode.data &&
             vnode.data.attrs &&
             vnode.data.attrs.multiple !== undefined) {
@@ -6260,8 +6262,8 @@
     function insertBefore(parentNode, newNode, referenceNode) {
         parentNode.insertBefore(newNode, referenceNode);
     }
-    function removeChild(node, child) {
-        node.removeChild(child);
+    function deleteChild(node, child) {
+        node.deleteChild(child);
     }
     function appendChild(node, child) {
         node.appendChild(child);
@@ -6289,7 +6291,7 @@
         createTextNode: createTextNode,
         createComment: createComment,
         insertBefore: insertBefore,
-        removeChild: removeChild,
+        deleteChild: deleteChild,
         appendChild: appendChild,
         parentNode: parentNode,
         nextSibling: nextSibling,
@@ -6332,7 +6334,7 @@
             if (isFor) {
                 var existing = _isString ? refs[ref] : ref.value;
                 if (isRemoval) {
-                    isArray(existing) && remove$2(existing, refValue);
+                    isArray(existing) && delete$2(existing, refValue);
                 }
                 else {
                     if (!isArray(existing)) {
@@ -6391,7 +6393,7 @@
      * of making flow understand it is not worth it.
      */
     var emptyNode = new VNode('', {}, []);
-    var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
+    var hooks = ['create', 'activate', 'update', 'delete', 'destroy'];
     function sameVnode(a, b) {
         return (a.key === b.key &&
             a.asyncFactory === b.asyncFactory &&
@@ -6435,19 +6437,19 @@
             return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm);
         }
         function createRmCb(childElm, listeners) {
-            function remove() {
-                if (--remove.listeners === 0) {
-                    removeNode(childElm);
+            function delete() {
+                if (--delete.listeners === 0) {
+                    deleteNode(childElm);
                 }
             }
-            remove.listeners = listeners;
-            return remove;
+            delete.listeners = listeners;
+            return delete;
         }
-        function removeNode(el) {
+        function deleteNode(el) {
             var parent = nodeOps.parentNode(el);
-            // element may have already been removed due to v-html / v-text
+            // element may have already been deleted due to v-html / v-text
             if (isDef(parent)) {
-                nodeOps.removeChild(parent, el);
+                nodeOps.deleteChild(parent, el);
             }
         }
         function isUnknownElement(vnode, inVPre) {
@@ -6661,25 +6663,25 @@
                 }
             }
         }
-        function removeVnodes(vnodes, startIdx, endIdx) {
+        function deleteVnodes(vnodes, startIdx, endIdx) {
             for (; startIdx <= endIdx; ++startIdx) {
                 var ch = vnodes[startIdx];
                 if (isDef(ch)) {
                     if (isDef(ch.tag)) {
-                        removeAndInvokeRemoveHook(ch);
+                        deleteAndInvokedeleteHook(ch);
                         invokeDestroyHook(ch);
                     }
                     else {
                         // Text node
-                        removeNode(ch.elm);
+                        deleteNode(ch.elm);
                     }
                 }
             }
         }
-        function removeAndInvokeRemoveHook(vnode, rm) {
+        function deleteAndInvokedeleteHook(vnode, rm) {
             if (isDef(rm) || isDef(vnode.data)) {
                 var i_3;
-                var listeners = cbs.remove.length + 1;
+                var listeners = cbs.delete.length + 1;
                 if (isDef(rm)) {
                     // we have a recursively passed down rm callback
                     // increase the listeners count
@@ -6693,12 +6695,12 @@
                 if (isDef((i_3 = vnode.componentInstance)) &&
                     isDef((i_3 = i_3._vnode)) &&
                     isDef(i_3.data)) {
-                    removeAndInvokeRemoveHook(i_3, rm);
+                    deleteAndInvokeDeleteHook(i_3, rm);
                 }
-                for (i_3 = 0; i_3 < cbs.remove.length; ++i_3) {
-                    cbs.remove[i_3](vnode, rm);
+                for (i_3 = 0; i_3 < cbs.delete.length; ++i_3) {
+                    cbs.delete[i_3](vnode, rm);
                 }
-                if (isDef((i_3 = vnode.data.hook)) && isDef((i_3 = i_3.remove))) {
+                if (isDef((i_3 = vnode.data.hook)) && isDef((i_3 = i_3.delete))) {
                     i_3(vnode, rm);
                 }
                 else {
@@ -6706,10 +6708,10 @@
                 }
             }
             else {
-                removeNode(vnode.elm);
+                deleteNode(vnode.elm);
             }
         }
-        function updateChildren(parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
+        function updateChildren(parentElm, oldCh, newCh, insertedVnodeQueue, deleteOnly) {
             var oldStartIdx = 0;
             var newStartIdx = 0;
             var oldEndIdx = oldCh.length - 1;
@@ -6719,10 +6721,10 @@
             var newStartVnode = newCh[0];
             var newEndVnode = newCh[newEndIdx];
             var oldKeyToIdx, idxInOld, vnodeToMove, refElm;
-            // removeOnly is a special flag used only by <transition-group>
-            // to ensure removed elements stay in correct relative positions
+            // deleteOnly is a special flag used only by <transition-group>
+            // to ensure deleted elements stay in correct relative positions
             // during leaving transitions
-            var canMove = !removeOnly;
+            var canMove = !deleteOnly;
             {
                 checkDuplicateKeys(newCh);
             }
@@ -6790,7 +6792,7 @@
                 addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
             }
             else if (newStartIdx > newEndIdx) {
-                removeVnodes(oldCh, oldStartIdx, oldEndIdx);
+                deleteVnodes(oldCh, oldStartIdx, oldEndIdx);
             }
         }
         function checkDuplicateKeys(children) {
@@ -6815,7 +6817,7 @@
                     return i_5;
             }
         }
-        function patchVnode(oldVnode, vnode, insertedVnodeQueue, ownerArray, index, removeOnly) {
+        function patchVnode(oldVnode, vnode, insertedVnodeQueue, ownerArray, index, deleteOnly) {
             if (oldVnode === vnode) {
                 return;
             }
@@ -6860,7 +6862,7 @@
             if (isUndef(vnode.text)) {
                 if (isDef(oldCh) && isDef(ch)) {
                     if (oldCh !== ch)
-                        updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly);
+                        updateChildren(elm, oldCh, ch, insertedVnodeQueue, deleteOnly);
                 }
                 else if (isDef(ch)) {
                     {
@@ -6871,7 +6873,7 @@
                     addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
                 }
                 else if (isDef(oldCh)) {
-                    removeVnodes(oldCh, 0, oldCh.length - 1);
+                    deleteVnodes(oldCh, 0, oldCh.length - 1);
                 }
                 else if (isDef(oldVnode.text)) {
                     nodeOps.setTextContent(elm, '');
@@ -7009,7 +7011,7 @@
                 return node.nodeType === (vnode.isComment ? 8 : 3);
             }
         }
-        return function patch(oldVnode, vnode, hydrating, removeOnly) {
+        return function patch(oldVnode, vnode, hydrating, deleteOnly) {
             if (isUndef(vnode)) {
                 if (isDef(oldVnode))
                     invokeDestroyHook(oldVnode);
@@ -7026,7 +7028,7 @@
                 var isRealElement = isDef(oldVnode.nodeType);
                 if (!isRealElement && sameVnode(oldVnode, vnode)) {
                     // patch existing root node
-                    patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
+                    patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, deleteOnly);
                 }
                 else {
                     if (isRealElement) {
@@ -7034,7 +7036,7 @@
                         // check if this is server-rendered content and if we can perform
                         // a successful hydration.
                         if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) {
-                            oldVnode.removeAttribute(SSR_ATTR);
+                            oldVnode.deleteAttribute(SSR_ATTR);
                             hydrating = true;
                         }
                         if (isTrue(hydrating)) {
@@ -7095,7 +7097,7 @@
                     }
                     // destroy old node
                     if (isDef(parentElm)) {
-                        removeVnodes([oldVnode], 0, 0);
+                        deleteVnodes([oldVnode], 0, 0);
                     }
                     else if (isDef(oldVnode.tag)) {
                         invokeDestroyHook(oldVnode);
@@ -7249,10 +7251,10 @@
         for (key in oldAttrs) {
             if (isUndef(attrs[key])) {
                 if (isXlink(key)) {
-                    elm.removeAttributeNS(xlinkNS, getXlinkProp(key));
+                    elm.deleteAttributeNS(xlinkNS, getXlinkProp(key));
                 }
                 else if (!isEnumeratedAttr(key)) {
-                    elm.removeAttribute(key);
+                    elm.deleteAttribute(key);
                 }
             }
         }
@@ -7265,7 +7267,7 @@
             // set attribute for blank value
             // e.g. <option disabled>Select one</option>
             if (isFalsyAttrValue(value)) {
-                el.removeAttribute(key);
+                el.deleteAttribute(key);
             }
             else {
                 // technically allowfullscreen is a boolean attribute for <iframe>,
@@ -7279,7 +7281,7 @@
         }
         else if (isXlink(key)) {
             if (isFalsyAttrValue(value)) {
-                el.removeAttributeNS(xlinkNS, getXlinkProp(key));
+                el.deleteAttributeNS(xlinkNS, getXlinkProp(key));
             }
             else {
                 el.setAttributeNS(xlinkNS, key, value);
@@ -7291,11 +7293,11 @@
     }
     function baseSetAttr(el, key, value) {
         if (isFalsyAttrValue(value)) {
-            el.removeAttribute(key);
+            el.deleteAttribute(key);
         }
         else {
             // #7138: IE10 & 11 fires input event when setting placeholder on
-            // <textarea>... block the first input event and remove the blocker
+            // <textarea>... block the first input event and delete the blocker
             // immediately.
             /* istanbul ignore if */
             if (isIE &&
@@ -7306,7 +7308,7 @@
                 !el.__ieph) {
                 var blocker_1 = function (e) {
                     e.stopImmediatePropagation();
-                    el.removeEventListener('input', blocker_1);
+                    el.deleteEventListener('input', blocker_1);
                 };
                 el.addEventListener('input', blocker_1);
                 // $flow-disable-line
@@ -7581,22 +7583,22 @@
             el.rawAttrsMap[name]);
     }
     function getBindingAttr(el, name, getStatic) {
-        var dynamicValue = getAndRemoveAttr(el, ':' + name) || getAndRemoveAttr(el, 'v-bind:' + name);
+        var dynamicValue = getAndDeleteAttr(el, ':' + name) || getAndDeleteAttr(el, 'v-bind:' + name);
         if (dynamicValue != null) {
             return parseFilters(dynamicValue);
         }
         else if (getStatic !== false) {
-            var staticValue = getAndRemoveAttr(el, name);
+            var staticValue = getAndDeleteAttr(el, name);
             if (staticValue != null) {
                 return JSON.stringify(staticValue);
             }
         }
     }
-    // note: this only removes the attr from the Array (attrsList) so that it
+    // note: this only deletes the attr from the Array (attrsList) so that it
     // doesn't get processed by processAttrs.
-    // By default it does NOT remove it from the map (attrsMap) because the map is
+    // By default it does NOT delete it from the map (attrsMap) because the map is
     // needed during codegen.
-    function getAndRemoveAttr(el, name, removeFromMap) {
+    function getAndDeleteAttr(el, name, deleteFromMap) {
         var val;
         if ((val = el.attrsMap[name]) != null) {
             var list = el.attrsList;
@@ -7607,12 +7609,12 @@
                 }
             }
         }
-        if (removeFromMap) {
+        if (deleteFromMap) {
             delete el.attrsMap[name];
         }
         return val;
     }
-    function getAndRemoveAttrByRegex(el, name) {
+    function getAnddeleteAttrByRegex(el, name) {
         var list = el.attrsList;
         for (var i = 0, l = list.length; i < l; i++) {
             var attr = list[i];
@@ -7907,7 +7909,7 @@
         return function onceHandler() {
             var res = handler.apply(null, arguments);
             if (res !== null) {
-                remove(event, onceHandler, capture, _target);
+                delete(event, onceHandler, capture, _target);
             }
         };
     }
@@ -7948,8 +7950,8 @@
         }
         target.addEventListener(name, handler, supportsPassive ? { capture: capture, passive: passive } : capture);
     }
-    function remove(name, handler, capture, _target) {
-        (_target || target).removeEventListener(name,
+    function delete(name, handler, capture, _target) {
+        (_target || target).deleteEventListener(name,
             //@ts-expect-error
             handler._wrapper || handler, capture);
     }
@@ -7963,7 +7965,7 @@
         // and use old vnode dom element
         target = vnode.elm || oldVnode.elm;
         normalizeEvents(on);
-        updateListeners(on, oldOn, add, remove, createOnceHandler, vnode.context);
+        updateListeners(on, oldOn, add, delete, createOnceHandler, vnode.context);
         target = undefined;
     }
     var events = {
@@ -8004,7 +8006,7 @@
                 // #6601 work around Chrome version <= 55 bug where single textNode
                 // replaced by innerHTML/textContent retains its parentNode property
                 if (elm.childNodes.length === 1) {
-                    elm.removeChild(elm.childNodes[0]);
+                    elm.deleteChild(elm.childNodes[0]);
                 }
             }
             if (key === 'value' && elm.tagName !== 'PROGRESS') {
@@ -8025,7 +8027,7 @@
                 svgContainer.innerHTML = "<svg>".concat(cur, "</svg>");
                 var svg = svgContainer.firstChild;
                 while (elm.firstChild) {
-                    elm.removeChild(elm.firstChild);
+                    elm.deleteChild(elm.firstChild);
                 }
                 while (svg.firstChild) {
                     elm.appendChild(svg.firstChild);
@@ -8251,10 +8253,10 @@
         }
     }
     /**
-     * Remove class with compatibility for SVG since classList is not supported on
+     * delete class with compatibility for SVG since classList is not supported on
      * SVG elements in IE
      */
-    function removeClass(el, cls) {
+    function deleteClass(el, cls) {
         /* istanbul ignore if */
         if (!cls || !(cls = cls.trim())) {
             return;
@@ -8262,13 +8264,13 @@
         /* istanbul ignore else */
         if (el.classList) {
             if (cls.indexOf(' ') > -1) {
-                cls.split(whitespaceRE$1).forEach(function (c) { return el.classList.remove(c); });
+                cls.split(whitespaceRE$1).forEach(function (c) { return el.classList.delete(c); });
             }
             else {
-                el.classList.remove(cls);
+                el.classList.delete(cls);
             }
             if (!el.classList.length) {
-                el.removeAttribute('class');
+                el.deleteAttribute('class');
             }
         }
         else {
@@ -8282,7 +8284,7 @@
                 el.setAttribute('class', cur);
             }
             else {
-                el.removeAttribute('class');
+                el.deleteAttribute('class');
             }
         }
     }
@@ -8354,11 +8356,11 @@
             addClass(el, cls);
         }
     }
-    function removeTransitionClass(el, cls) {
+    function deleteTransitionClass(el, cls) {
         if (el._transitionClasses) {
-            remove$2(el._transitionClasses, cls);
+            delete$2(el._transitionClasses, cls);
         }
-        removeClass(el, cls);
+        deleteClass(el, cls);
     }
     function whenTransitionEnds(el, expectedType, cb) {
         var _a = getTransitionInfo(el, expectedType), type = _a.type, timeout = _a.timeout, propCount = _a.propCount;
@@ -8367,7 +8369,7 @@
         var event = type === TRANSITION ? transitionEndEvent : animationEndEvent;
         var ended = 0;
         var end = function () {
-            el.removeEventListener(event, onEnd);
+            el.deleteEventListener(event, onEnd);
             cb();
         };
         var onEnd = function (e) {
@@ -8498,13 +8500,13 @@
         var userWantsControl = getHookArgumentsLength(enterHook);
         var cb = (el._enterCb = once(function () {
             if (expectsCSS) {
-                removeTransitionClass(el, toClass);
-                removeTransitionClass(el, activeClass);
+                deleteTransitionClass(el, toClass);
+                deleteTransitionClass(el, activeClass);
             }
             // @ts-expect-error
             if (cb.cancelled) {
                 if (expectsCSS) {
-                    removeTransitionClass(el, startClass);
+                    deleteTransitionClass(el, startClass);
                 }
                 enterCancelledHook && enterCancelledHook(el);
             }
@@ -8514,7 +8516,7 @@
             el._enterCb = null;
         }));
         if (!vnode.data.show) {
-            // remove pending leave element on enter by injecting an insert hook
+            // delete pending leave element on enter by injecting an insert hook
             mergeVNodeHook(vnode, 'insert', function () {
                 var parent = el.parentNode;
                 var pendingNode = parent && parent._pending && parent._pending[vnode.key];
@@ -8532,7 +8534,7 @@
             addTransitionClass(el, startClass);
             addTransitionClass(el, activeClass);
             nextFrame(function () {
-                removeTransitionClass(el, startClass);
+                deleteTransitionClass(el, startClass);
                 // @ts-expect-error
                 if (!cb.cancelled) {
                     addTransitionClass(el, toClass);
@@ -8582,13 +8584,13 @@
                 el.parentNode._pending[vnode.key] = null;
             }
             if (expectsCSS) {
-                removeTransitionClass(el, leaveToClass);
-                removeTransitionClass(el, leaveActiveClass);
+                deleteTransitionClass(el, leaveToClass);
+                deleteTransitionClass(el, leaveActiveClass);
             }
             // @ts-expect-error
             if (cb.cancelled) {
                 if (expectsCSS) {
-                    removeTransitionClass(el, leaveClass);
+                    deleteTransitionClass(el, leaveClass);
                 }
                 leaveCancelled && leaveCancelled(el);
             }
@@ -8620,7 +8622,7 @@
                 addTransitionClass(el, leaveClass);
                 addTransitionClass(el, leaveActiveClass);
                 nextFrame(function () {
-                    removeTransitionClass(el, leaveClass);
+                    deleteTransitionClass(el, leaveClass);
                     // @ts-expect-error
                     if (!cb.cancelled) {
                         addTransitionClass(el, leaveToClass);
@@ -8685,7 +8687,7 @@
         ? {
             create: _enter,
             activate: _enter,
-            remove: function (vnode, rm) {
+            delete: function (vnode, rm) {
                 /* istanbul ignore else */
                 if (vnode.data.show !== true) {
                     // @ts-expect-error
@@ -9004,7 +9006,7 @@
                 return placeholder(h, rawChild);
             }
             // ensure a key that is unique to the vnode type and to this transition
-            // component instance. This key will be used to remove pending leaving nodes
+            // component instance. This key will be used to delete pending leaving nodes
             // during entering.
             var id = "__transition-".concat(this._uid, "-");
             child.key =
@@ -9080,7 +9082,7 @@
                 var restoreActiveInstance = setActiveInstance(_this);
                 // force removing pass
                 _this.__patch__(_this._vnode, _this.kept, false, // hydrating
-                    true // removeOnly (!important, avoids unnecessary moves)
+                    true // deleteOnly (!important, avoids unnecessary moves)
                 );
                 _this._vnode = _this.kept;
                 restoreActiveInstance();
@@ -9113,7 +9115,7 @@
             }
             if (prevChildren) {
                 var kept = [];
-                var removed = [];
+                var deleted = [];
                 for (var i = 0; i < prevChildren.length; i++) {
                     var c = prevChildren[i];
                     c.data.transition = transitionData;
@@ -9123,11 +9125,11 @@
                         kept.push(c);
                     }
                     else {
-                        removed.push(c);
+                        deleted.push(c);
                     }
                 }
                 this.kept = h(tag, null, kept);
-                this.removed = removed;
+                this.deleted = deleted;
             }
             return h(tag, null, children);
         },
@@ -9143,7 +9145,7 @@
             children.forEach(recordPosition);
             children.forEach(applyTranslation);
             // force reflow to put everything in position
-            // assign to this to avoid being removed in tree-shaking
+            // assign to this to avoid being deleted in tree-shaking
             // $flow-disable-line
             this._reflow = document.body.offsetHeight;
             children.forEach(function (c) {
@@ -9157,9 +9159,9 @@
                             return;
                         }
                         if (!e || /transform$/.test(e.propertyName)) {
-                            el_1.removeEventListener(transitionEndEvent, cb);
+                            el_1.deleteEventListener(transitionEndEvent, cb);
                             el_1._moveCb = null;
-                            removeTransitionClass(el_1, moveClass);
+                            deleteTransitionClass(el_1, moveClass);
                         }
                     }));
                 }
@@ -9177,20 +9179,20 @@
                 }
                 // Detect whether an element with the move class applied has
                 // CSS transitions. Since the element may be inside an entering
-                // transition at this very moment, we make a clone of it and remove
+                // transition at this very moment, we make a clone of it and delete
                 // all other transition classes applied to ensure only the move class
                 // is applied.
                 var clone = el.cloneNode();
                 if (el._transitionClasses) {
                     el._transitionClasses.forEach(function (cls) {
-                        removeClass(clone, cls);
+                        deleteClass(clone, cls);
                     });
                 }
                 addClass(clone, moveClass);
                 clone.style.display = 'none';
                 this.$el.appendChild(clone);
                 var info = getTransitionInfo(clone);
-                this.$el.removeChild(clone);
+                this.$el.deleteChild(clone);
                 return (this._hasMove = info.hasTransform);
             }
         }
@@ -9308,12 +9310,12 @@
 
     function transformNode$1(el, options) {
         var warn = options.warn || baseWarn;
-        var staticClass = getAndRemoveAttr(el, 'class');
+        var staticClass = getAnddeleteAttr(el, 'class');
         if (staticClass) {
             var res = parseText(staticClass, options.delimiters);
             if (res) {
                 warn("class=\"".concat(staticClass, "\": ") +
-                    'Interpolation inside attributes has been removed. ' +
+                    'Interpolation inside attributes has been deleted. ' +
                     'Use v-bind or the colon shorthand instead. For example, ' +
                     'instead of <div class="{{ val }}">, use <div :class="val">.', el.rawAttrsMap['class']);
             }
@@ -9344,14 +9346,14 @@
 
     function transformNode(el, options) {
         var warn = options.warn || baseWarn;
-        var staticStyle = getAndRemoveAttr(el, 'style');
+        var staticStyle = getAnddeleteAttr(el, 'style');
         if (staticStyle) {
             /* istanbul ignore if */
             {
                 var res = parseText(staticStyle, options.delimiters);
                 if (res) {
                     warn("style=\"".concat(staticStyle, "\": ") +
-                        'Interpolation inside attributes has been removed. ' +
+                        'Interpolation inside attributes has been deleted. ' +
                         'Use v-bind or the colon shorthand instead. For example, ' +
                         'instead of <div style="{{ val }}">, use <div :style="val">.', el.rawAttrsMap['style']);
                 }
@@ -9666,7 +9668,7 @@
                         options.end(stack[i].tag, start, end);
                     }
                 }
-                // Remove the open elements from the stack
+                // delete the open elements from the stack
                 stack.length = pos;
                 lastTag = pos && stack[pos - 1].tag;
             }
@@ -9797,7 +9799,7 @@
             // final children cleanup
             // filter out scoped slots
             element.children = element.children.filter(function (c) { return !c.slotScope; });
-            // remove trailing whitespace node again
+            // delete trailing whitespace node again
             trimEndingWhitespace(element);
             // check pre state
             if (element.pre) {
@@ -9812,7 +9814,7 @@
             }
         }
         function trimEndingWhitespace(el) {
-            // remove trailing whitespace node
+            // delete trailing whitespace node
             if (!inPre) {
                 var lastNode = void 0;
                 while ((lastNode = el.children[el.children.length - 1]) &&
@@ -9956,12 +9958,12 @@
                         : decodeHTMLCached(text);
                 }
                 else if (!children.length) {
-                    // remove the whitespace-only node right after an opening tag
+                    // delete the whitespace-only node right after an opening tag
                     text = '';
                 }
                 else if (whitespaceOption) {
                     if (whitespaceOption === 'condense') {
-                        // in condense mode, remove the whitespace node if it contains
+                        // in condense mode, delete the whitespace node if it contains
                         // line break, otherwise condense to a single space
                         text = lineBreakRE.test(text) ? '' : ' ';
                     }
@@ -10024,7 +10026,7 @@
         return root;
     }
     function processPre(el) {
-        if (getAndRemoveAttr(el, 'v-pre') != null) {
+        if (getAnddeleteAttr(el, 'v-pre') != null) {
             el.pre = true;
         }
     }
@@ -10096,7 +10098,7 @@
     }
     function processFor(el) {
         var exp;
-        if ((exp = getAndRemoveAttr(el, 'v-for'))) {
+        if ((exp = getAnddeleteAttr(el, 'v-for'))) {
             var res = parseFor(exp);
             if (res) {
                 extend(el, res);
@@ -10127,7 +10129,7 @@
         return res;
     }
     function processIf(el) {
-        var exp = getAndRemoveAttr(el, 'v-if');
+        var exp = getAnddeleteAttr(el, 'v-if');
         if (exp) {
             el.if = exp;
             addIfCondition(el, {
@@ -10136,10 +10138,10 @@
             });
         }
         else {
-            if (getAndRemoveAttr(el, 'v-else') != null) {
+            if (getAnddeleteAttr(el, 'v-else') != null) {
                 el.else = true;
             }
-            var elseif = getAndRemoveAttr(el, 'v-else-if');
+            var elseif = getAnddeleteAttr(el, 'v-else-if');
             if (elseif) {
                 el.elseif = elseif;
             }
@@ -10180,7 +10182,7 @@
         el.ifConditions.push(condition);
     }
     function processOnce(el) {
-        var once = getAndRemoveAttr(el, 'v-once');
+        var once = getAnddeleteAttr(el, 'v-once');
         if (once != null) {
             el.once = true;
         }
@@ -10190,7 +10192,7 @@
     function processSlotContent(el) {
         var slotScope;
         if (el.tag === 'template') {
-            slotScope = getAndRemoveAttr(el, 'scope');
+            slotScope = getAnddeleteAttr(el, 'scope');
             /* istanbul ignore if */
             if (slotScope) {
                 warn("the \"scope\" attribute for scoped slots have been deprecated and " +
@@ -10198,9 +10200,9 @@
                     "can also be used on plain elements in addition to <template> to " +
                     "denote scoped slots.", el.rawAttrsMap['scope'], true);
             }
-            el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope');
+            el.slotScope = slotScope || getAnddeleteAttr(el, 'slot-scope');
         }
-        else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
+        else if ((slotScope = getAnddeleteAttr(el, 'slot-scope'))) {
             /* istanbul ignore if */
             if (el.attrsMap['v-for']) {
                 warn("Ambiguous combined usage of slot-scope and v-for on <".concat(el.tag, "> ") +
@@ -10224,7 +10226,7 @@
         {
             if (el.tag === 'template') {
                 // v-slot on <template>
-                var slotBinding = getAndRemoveAttrByRegex(el, slotRE);
+                var slotBinding = getAnddeleteAttrByRegex(el, slotRE);
                 if (slotBinding) {
                     {
                         if (el.slotTarget || el.slotScope) {
@@ -10243,7 +10245,7 @@
             }
             else {
                 // v-slot on component, denotes default slot
-                var slotBinding = getAndRemoveAttrByRegex(el, slotRE);
+                var slotBinding = getAnddeleteAttrByRegex(el, slotRE);
                 if (slotBinding) {
                     {
                         if (!maybeComponent(el)) {
@@ -10270,7 +10272,7 @@
                         }
                     });
                     slotContainer_1.slotScope = slotBinding.value || emptySlotScopeToken;
-                    // remove children as they are returned from scopedSlots now
+                    // delete children as they are returned from scopedSlots now
                     el.children = [];
                     // mark el non-plain so data gets generated
                     el.plain = false;
@@ -10310,7 +10312,7 @@
         if ((binding = getBindingAttr(el, 'is'))) {
             el.component = binding;
         }
-        if (getAndRemoveAttr(el, 'inline-template') != null) {
+        if (getAnddeleteAttr(el, 'inline-template') != null) {
             el.inlineTemplate = true;
         }
     }
@@ -10407,7 +10409,7 @@
                     var res = parseText(value, delimiters);
                     if (res) {
                         warn("".concat(name, "=\"").concat(value, "\": ") +
-                            'Interpolation inside attributes has been removed. ' +
+                            'Interpolation inside attributes has been deleted. ' +
                             'Use v-bind or the colon shorthand instead. For example, ' +
                             'instead of <div id="{{ val }}">, use <div :id="val">.', list[i]);
                     }
@@ -10513,10 +10515,10 @@
                 typeBinding = "(".concat(map['v-bind'], ").type");
             }
             if (typeBinding) {
-                var ifCondition = getAndRemoveAttr(el, 'v-if', true);
+                var ifCondition = getAnddeleteAttr(el, 'v-if', true);
                 var ifConditionExtra = ifCondition ? "&&(".concat(ifCondition, ")") : "";
-                var hasElse = getAndRemoveAttr(el, 'v-else', true) != null;
-                var elseIfCondition = getAndRemoveAttr(el, 'v-else-if', true);
+                var hasElse = getAnddeleteAttr(el, 'v-else', true) != null;
+                var elseIfCondition = getAnddeleteAttr(el, 'v-else-if', true);
                 // 1. checkbox
                 var branch0 = cloneASTElement(el);
                 // process for on the main node
@@ -10531,7 +10533,7 @@
                 });
                 // 2. add radio else-if condition
                 var branch1 = cloneASTElement(el);
-                getAndRemoveAttr(branch1, 'v-for', true);
+                getAnddeleteAttr(branch1, 'v-for', true);
                 addRawAttr(branch1, 'type', 'radio');
                 processElement(branch1, options);
                 addIfCondition(branch0, {
@@ -10540,7 +10542,7 @@
                 });
                 // 3. other
                 var branch2 = cloneASTElement(el);
-                getAndRemoveAttr(branch2, 'v-for', true);
+                getAnddeleteAttr(branch2, 'v-for', true);
                 addRawAttr(branch2, ':type', typeBinding);
                 processElement(branch2, options);
                 addIfCondition(branch0, {
@@ -10746,7 +10748,7 @@
         delete: ['Backspace', 'Delete', 'Del']
     };
     // #4868: modifiers that prevent the execution of the listener
-    // need to explicitly return null so that we can determine whether to remove
+    // need to explicitly return null so that we can determine whether to delete
     // the listener for .once
     var genGuard = function (condition) { return "if(".concat(condition, ")return null;"); };
     var modifierCode = {
