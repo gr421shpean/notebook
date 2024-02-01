@@ -26,3 +26,16 @@ export default {
       column3Cards: []
     }
   },
+  methods: {
+    addCardToColumn1(card) {
+      this.column1Cards.push(card)
+    },
+    addCardToColumn2(card) {
+      this.column2Cards.push(card)
+    },
+    addCardToColumn3(card) {
+      this.column3Cards.push(card)
+    },
+  }
+}
+</script>

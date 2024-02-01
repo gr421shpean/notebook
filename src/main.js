@@ -6,17 +6,58 @@ Vue.component('columns', {
       <column title="Выполненные" :cards="completedColumn" @delete-card="deleteCard('completedColumn', $event)" @save-local-storage="saveToLocalStorage"></column>
       </div>
     `,
+    data() {
+        return {
+            newColumn: [],
+            inProgressColumn: [],
+            completedColumn: [],
+            maxCards: {
+                completedColumn: Infinity
+            },
+            isFirstColumnLocked: false
+        }
+    },
+    created() {
+        this.loadFromLocalStorage();
+    },
     loadFromLocalStorage() {
         const data = JSON.parse(localStorage.getItem('todo-columns'));
         if (data) {
             this.newColumn = data.newColumn || [];
             this.inProgressColumn = data.inProgressColumn || [];
             this.completedColumn = data.completedColumn || [];
-            // Установка состояния чекбоксов
             this.newColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
             this.inProgressColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
             this.completedColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
         }
+    },
+    methods: {
+        addCard(column, customTitle) {
+            const totalCards = this.newColumn.length + this.inProgressColumn.length + this.completedColumn.length;
+            if (totalCards >= this.maxCards.newColumn + this.maxCards.inProgressColumn + this.maxCards.completedColumn) {
+                alert(`Слишком много пунктов.`);
+                return;
+            }
+            if (this[column].length >= this.maxCards[column]) {
+                alert(`Слишком много пунктов "${this.getColumnTitle(column)}".`);
+                return;
+            }
+            if (column !== 'newColumn') {
+                alert(`Можно добавлять только новые заметки.`);
+                return;
+            }
+            const newCard = {
+                title: customTitle || 'Новая заметка',
+                items: [
+                    { text: '', completed: false, editing: true },
+                    { text: '', completed: false, editing: true },
+                    { text: '', completed: false, editing: true }
+                ],
+                status: 'Новые'
+            };
+            this[column].push(newCard);
+            this.saveToLocalStorage();
+        },
     },
     getColumnTitle(column) {
         switch (column) {
@@ -28,6 +69,46 @@ Vue.component('columns', {
                 return 'Выполненные';
             default:
                 return '';
+        }
+    },
+    moveCardToInProgress(card) {
+        const index = this.newColumn.indexOf(card);
+        if (index !== -1) {
+            if (this.inProgressColumn.length >= this.maxCards.inProgressColumn) {
+                alert('Столбец "В процессе" уже содержит максимальное количество карточек.');
+                return;
+            }
+
+            this.newColumn.splice(index, 1);
+            this.inProgressColumn.push(card);
+            this.saveToLocalStorage();
+
+        }
+    },
+    moveCardToInProgress(card) {
+        const index = this.newColumn.indexOf(card);
+        if (index !== -1) {
+            if (this.inProgressColumn.length >= this.maxCards.inProgressColumn) {
+                alert('Столбец "В процессе" уже содержит максимальное количество карточек.');
+                return;
+            }
+
+            this.newColumn.splice(index, 1);
+            this.inProgressColumn.push(card);
+            this.saveToLocalStorage();
+
+
+            if (this.inProgressColumn.length >= this.maxCards.inProgressColumn) {
+                this.lockFirstColumn();
+            }
+        }
+    },
+    moveCardToCompleted(card) {
+        const index = this.inProgressColumn.indexOf(card);
+        if (index !== -1) {
+            this.inProgressColumn.splice(index, 1);
+            this.completedColumn.push(card);
+            this.saveToLocalStorage();
         }
     }
 });
@@ -53,7 +134,7 @@ Vue.component('column', {
         deleteCard(cardIndex) {
             this.$emit('delete-card', cardIndex);
         },
-       
+
         addCardWithCustomTitle() {
             if (this.customTitle) {
                 this.$emit('add-card', this.customTitle);
@@ -67,6 +148,19 @@ Vue.component('column', {
         },
         moveCardToCompleted(card) {
             this.$emit('move-card-to-completed', card);
+        }
+    }
+});
+Vue.component('card', {
+    props: ['card', 'isFirstColumnLocked'],
+    methods: {
+        addItem() {
+            if (this.card.items.length < 5 && this.card.items.length >= 3 && !this.isFirstColumnLocked) {
+                this.card.items.push({ text: '', completed: false, editing: true });
+                this.saveToLocalStorage();
+            } else {
+                alert('Слишком много пунктов.');
+            }
         }
     }
 });
