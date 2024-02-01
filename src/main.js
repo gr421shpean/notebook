@@ -7,6 +7,7 @@ Vue.component('notes-item', {
     `,
     props: ['title']
 });
+
 Vue.component('columns', {
     template: `
       <div class="columns">
@@ -58,69 +59,69 @@ Vue.component('columns', {
             this[column].push(newCard);
             this.saveToLocalStorage();
         },
-    },
-    loadFromLocalStorage() {
-        const data = JSON.parse(localStorage.getItem('todo-columns'));
-        if (data) {
-            this.newColumn = data.newColumn || [];
-            this.inProgressColumn = data.inProgressColumn || [];
-            this.completedColumn = data.completedColumn || [];
-            this.newColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
-            this.inProgressColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
-            this.completedColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
-        }
-    },
-    deleteCard(column, cardIndex) {
-        this[column].splice(cardIndex, 1);
-        this.saveToLocalStorage();
-    },
-    saveToLocalStorage() {
-        localStorage.setItem('todo-columns', JSON.stringify({
-            newColumn: this.newColumn,
-            inProgressColumn: this.inProgressColumn,
-            completedColumn: this.completedColumn
-        }));
-    },
-    getColumnTitle(column) {
-        switch (column) {
-            case 'newColumn':
-                return 'Новые';
-            case 'inProgressColumn':
-                return 'В процессе';
-            case 'completedColumn':
-                return 'Выполненные';
-            default:
-                return '';
-        }
-    },
-    moveCardToInProgress(card) {
-        const index = this.newColumn.indexOf(card);
-        if (index !== -1) {
-            if (this.inProgressColumn.length >= this.maxCards.inProgressColumn) {
-                alert('Столбец "В процессе" уже содержит максимальное количество карточек.');
-                return;
+        deleteCard(column, cardIndex) {
+            this[column].splice(cardIndex, 1);
+            this.saveToLocalStorage();
+        },
+        saveToLocalStorage() {
+            localStorage.setItem('todo-columns', JSON.stringify({
+                newColumn: this.newColumn,
+                inProgressColumn: this.inProgressColumn,
+                completedColumn: this.completedColumn
+            }));
+        },
+        loadFromLocalStorage() {
+            const data = JSON.parse(localStorage.getItem('todo-columns'));
+            if (data) {
+                this.newColumn = data.newColumn || [];
+                this.inProgressColumn = data.inProgressColumn || [];
+                this.completedColumn = data.completedColumn || [];
+                // Установка состояния чекбоксов
+                this.newColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
+                this.inProgressColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
+                this.completedColumn.forEach(card => card.items.forEach(item => item.completed = !!item.completed));
             }
+        },
+        getColumnTitle(column) {
+            switch (column) {
+                case 'newColumn':
+                    return 'Новые';
+                case 'inProgressColumn':
+                    return 'В процессе';
+                case 'completedColumn':
+                    return 'Выполненные';
+                default:
+                    return '';
+            }
+        },
+        moveCardToInProgress(card) {
+            const index = this.newColumn.indexOf(card);
+            if (index !== -1) {
+                if (this.inProgressColumn.length >= this.maxCards.inProgressColumn) {
+                    alert('Столбец "В процессе" уже содержит максимальное количество карточек.');
+                    return;
+                }
 
-            this.newColumn.splice(index, 1);
-            this.inProgressColumn.push(card);
-            this.saveToLocalStorage();
-            if (this.inProgressColumn.length >= this.maxCards.inProgressColumn) {
-                this.lockFirstColumn();
+                this.newColumn.splice(index, 1);
+                this.inProgressColumn.push(card);
+                this.saveToLocalStorage();
+                if (this.inProgressColumn.length >= this.maxCards.inProgressColumn) {
+                    this.lockFirstColumn();
+                }
             }
+        },
+        moveCardToCompleted(card) {
+            const index = this.inProgressColumn.indexOf(card);
+            if (index !== -1) {
+                this.inProgressColumn.splice(index, 1);
+                this.completedColumn.push(card);
+                this.saveToLocalStorage();
+            }
+        },
+        lockFirstColumn() {
+            this.isFirstColumnLocked = true;
         }
-    },
-    moveCardToCompleted(card) {
-        const index = this.inProgressColumn.indexOf(card);
-        if (index !== -1) {
-            this.inProgressColumn.splice(index, 1);
-            this.completedColumn.push(card);
-            this.saveToLocalStorage();
-        }
-    },
-    lockFirstColumn() {
-        this.isFirstColumnLocked = true;
     }
-
 });
 
 Vue.component('column', {
@@ -162,6 +163,8 @@ Vue.component('column', {
         }
     }
 });
+
+
 Vue.component('card', {
     props: ['card', 'isFirstColumnLocked'],
     template: `

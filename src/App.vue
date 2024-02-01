@@ -36,6 +36,15 @@ export default {
     addCardToColumn3(card) {
       this.column3Cards.push(card)
     },
+    deleteCardFromColumn1(cardIndex) {
+      this.column1Cards.splice(cardIndex, 1)
+    },
+    deleteCardFromColumn2(cardIndex) {
+      this.column2Cards.splice(cardIndex, 1)
+    },
+    deleteCardFromColumn3(cardIndex) {
+      this.column3Cards.splice(cardIndex, 1)
+    }
   }
 }
 </script>
